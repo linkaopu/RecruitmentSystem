@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lin.server.mapper.SystemLogMapper">
+
+    <resultMap id="SystemLogResultMap" type="com.lin.pojo.entity.SystemLog">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="action" column="action"/>
+        <result property="ip" column="ip"/>
+        <result property="userAgent" column="user_agent"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <!-- 查询系统日志（分页） -->
+    <select id="selectLogs" resultMap="SystemLogResultMap">
+        SELECT * FROM system_log
+        ORDER BY created_at DESC
+        LIMIT #{pageSize} OFFSET ${(pageNum - 1) * pageSize}
+    </select>
+
+    <!-- 统计日志总数 -->
+    <select id="countLogs" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM system_log
+    </select>
+
+    <!-- 插入日志 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO system_log (user_id, username, action, ip, user_agent, created_at)
+        VALUES (#{userId}, #{username}, #{action}, #{ip}, #{userAgent}, NOW())
+    </insert>
+
+</mapper>

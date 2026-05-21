@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lin.server.mapper.DepartmentMapper">
+
+    <resultMap id="DepartmentResultMap" type="com.lin.pojo.entity.Department">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="code" column="code"/>
+        <result property="description" column="description"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- 查询所有部门 -->
+    <select id="selectAll" resultMap="DepartmentResultMap">
+        SELECT * FROM department ORDER BY created_at DESC
+    </select>
+
+    <!-- 根据ID查询部门 -->
+    <select id="selectById" resultMap="DepartmentResultMap">
+        SELECT * FROM department WHERE id = #{id}
+    </select>
+
+    <!-- 插入部门 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO department (name, code, description, created_at, updated_at)
+        VALUES (#{name}, #{code}, #{description}, NOW(), NOW())
+    </insert>
+
+    <!-- 更新部门信息 -->
+    <update id="updateById">
+        UPDATE department
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="code != null">code = #{code},</if>
+            <if test="description != null">description = #{description},</if>
+            updated_at = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除部门 -->
+    <delete id="deleteById">
+        DELETE FROM department WHERE id = #{id}
+    </delete>
+
+</mapper>
