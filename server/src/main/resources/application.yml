@@ -6,6 +6,23 @@ spring:
     active: dev
   main:
     allow-circular-references: true
+  datasource:
+    driver-class-name: ${serve.datasource.driver-class-name}
+    url: ${serve.datasource.url}
+    username: ${serve.datasource.username}
+    password: ${serve.datasource.password}
+    type: ${serve.datasource.type}
+    druid:
+      initial-size: ${serve.datasource.druid.initial-size}
+      min-idle: ${serve.datasource.druid.min-idle}
+      max-active: ${serve.datasource.druid.max-active}
+      max-wait: ${serve.datasource.druid.max-wait}
+      time-between-eviction-runs-millis: ${serve.datasource.druid.time-between-eviction-runs-millis}
+      min-evictable-idle-time-millis: ${serve.datasource.druid.min-evictable-idle-time-millis}
+      validation-query: ${serve.datasource.druid.validation-query}
+      test-while-idle: ${serve.datasource.druid.test-while-idle}
+      test-on-borrow: ${serve.datasource.druid.test-on-borrow}
+      test-on-return: ${serve.datasource.druid.test-on-return}
 
 # MyBatis配置
 mybatis:
@@ -14,3 +31,29 @@ mybatis:
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+logging:
+  level:
+    com:
+      sky:
+        mapper: debug
+        service: info
+        controller: info
+
+# 邮件配置（QQ邮箱）
+spring:
+  mail:
+    host: smtp.qq.com
+    port: 587
+    username: ${MAIL_USERNAME:your-qq-email@qq.com}
+    password: ${MAIL_PASSWORD:your-authorization-code}
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            trust: smtp.qq.com

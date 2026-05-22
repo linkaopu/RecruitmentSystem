@@ -36,8 +36,9 @@ public interface UserService {
      */
     void deleteUser(Integer id);
     
-    /**
-     * 更新用户状态
-     */
-    void toggleUserStatus(Integer id, String status);
+    // TODO: 暂时禁用，因为数据库users表中没有status字段
+    // /**
+    //  * 更新用户状态
+    //  */
+    // void toggleUserStatus(Integer id, String status);
 }

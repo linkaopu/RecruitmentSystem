@@ -11,6 +11,7 @@
         <result property="phone" column="phone"/>
         <result property="role" column="role"/>
         <result property="avatar" column="avatar"/>
+        <result property="isDelete" column="is_delete"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
@@ -19,6 +20,7 @@
     <select id="selectUsers" resultMap="UserResultMap">
         SELECT * FROM users
         <where>
+            is_delete = 0
             <if test="query.username != null and query.username != ''">
                 AND username LIKE CONCAT('%', #{query.username}, '%')
             </if>
@@ -40,6 +42,7 @@
     <select id="countUsers" resultType="java.lang.Long">
         SELECT COUNT(*) FROM users
         <where>
+            is_delete = 0
             <if test="query.username != null and query.username != ''">
                 AND username LIKE CONCAT('%', #{query.username}, '%')
             </if>
@@ -57,7 +60,22 @@
 
     <!-- 根据ID查询用户 -->
     <select id="selectById" resultMap="UserResultMap">
-        SELECT * FROM users WHERE id = #{id}
+        SELECT * FROM users WHERE id = #{id} AND is_delete = 0
+    </select>
+
+    <!-- 根据用户名查询用户 -->
+    <select id="selectByUsername" resultMap="UserResultMap">
+        SELECT * FROM users WHERE username = #{username} AND is_delete = 0
+    </select>
+
+    <!-- 根据邮箱查询用户 -->
+    <select id="selectByEmail" resultMap="UserResultMap">
+        SELECT * FROM users WHERE email = #{email} AND is_delete = 0
+    </select>
+
+    <!-- 根据手机号查询用户 -->
+    <select id="selectByPhone" resultMap="UserResultMap">
+        SELECT * FROM users WHERE phone = #{phone} AND is_delete = 0
     </select>
 
     <!-- 插入用户 -->
@@ -80,14 +98,16 @@
         WHERE id = #{id}
     </update>
 
-    <!-- 删除用户 -->
-    <delete id="deleteById">
-        DELETE FROM users WHERE id = #{id}
-    </delete>
+    <!-- 逻辑删除用户 -->
+    <update id="deleteById">
+        UPDATE users SET is_delete = 1, updated_at = NOW() WHERE id = #{id}
+    </update>
 
-    <!-- 更新用户状态（通过添加status字段实现，如果表中没有需要添加） -->
+    <!-- 更新用户状态（暂时禁用，因为数据库users表中没有status字段） -->
+    <!--
     <update id="updateStatus">
         UPDATE users SET status = #{status}, updated_at = NOW() WHERE id = #{id}
     </update>
+    -->
 
 </mapper>

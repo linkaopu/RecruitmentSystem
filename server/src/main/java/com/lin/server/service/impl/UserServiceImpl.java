@@ -1,7 +1,8 @@
 package com.lin.server.service.impl;
 
-import com.lin.common.exception.BusinessException;
+import com.lin.common.exception.UserException;
 import com.lin.common.result.PageResult;
+import com.lin.common.utils.Md5Util;
 import com.lin.pojo.dto.CreateUserDTO;
 import com.lin.pojo.dto.UpdateUserDTO;
 import com.lin.pojo.dto.UserQueryDTO;
@@ -49,7 +50,7 @@ public class UserServiceImpl implements UserService {
     public UserVO getUserById(Integer id) {
         User user = userMapper.selectById(id);
         if (user == null) {
-            throw new BusinessException("用户不存在");
+            throw UserException.notFound();
         }
         return convertToVO(user);
     }
@@ -57,17 +58,34 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserVO createUser(CreateUserDTO createUserDTO) {
-        // 检查用户名是否已存在
-        // TODO: 添加用户名唯一性检查
+
+        // 检查邮箱是否已存在
+        User existingUser = userMapper.selectByEmail(createUserDTO.getEmail());
+        if (existingUser != null) {
+            throw UserException.emailExists();
+        }
+        
+        // 检查手机号是否已存在
+        if (createUserDTO.getPhone() != null && !createUserDTO.getPhone().isEmpty()) {
+            existingUser = userMapper.selectByPhone(createUserDTO.getPhone());
+            if (existingUser != null) {
+                throw UserException.phoneExists();
+            }
+        }
         
         // 创建用户实体
         User user = new User();
         BeanUtils.copyProperties(createUserDTO, user);
+        
+        // 对密码进行MD5加密
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            user.setPassword(Md5Util.md5(user.getPassword()));
+        } else {
+            throw new IllegalArgumentException("密码不能为空");
+        }
+        
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
-        
-        // 密码加密（实际项目中应该使用BCrypt等加密方式）
-        // user.setPassword(passwordEncoder.encode(user.getPassword()));
         
         // 插入数据库
         userMapper.insert(user);
@@ -83,13 +101,22 @@ public class UserServiceImpl implements UserService {
         // 检查用户是否存在
         User existingUser = userMapper.selectById(id);
         if (existingUser == null) {
-            throw new BusinessException("用户不存在");
+            throw UserException.notFound();
         }
         
         // 更新用户信息
         User user = new User();
         user.setId(id);
         BeanUtils.copyProperties(updateUserDTO, user);
+        
+        // 如果密码被更新，则进行MD5加密
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            user.setPassword(Md5Util.md5(user.getPassword()));
+            log.info("用户ID: {} 的密码已更新并加密", id);
+        } else {
+            // 如果DTO中没有密码字段，则不更新密码
+            user.setPassword(null);
+        }
         
         userMapper.updateById(user);
         
@@ -106,7 +133,7 @@ public class UserServiceImpl implements UserService {
         // 检查用户是否存在
         User existingUser = userMapper.selectById(id);
         if (existingUser == null) {
-            throw new BusinessException("用户不存在");
+            throw UserException.notFound();
         }
         
         // 删除用户
@@ -115,6 +142,9 @@ public class UserServiceImpl implements UserService {
         log.info("删除用户成功，用户ID: {}", id);
     }
     
+    // TODO: toggleUserStatus方法暂时禁用，因为数据库users表中没有status字段
+    // 如果需要使用此功能，请先在数据库中添加status字段
+    /*
     @Override
     @Transactional
     public void toggleUserStatus(Integer id, String status) {
@@ -134,6 +164,7 @@ public class UserServiceImpl implements UserService {
         
         log.info("更新用户状态成功，用户ID: {}, 状态: {}", id, status);
     }
+    */
     
     /**
      * 将User实体转换为UserVO
@@ -141,8 +172,6 @@ public class UserServiceImpl implements UserService {
     private UserVO convertToVO(User user) {
         UserVO vo = new UserVO();
         BeanUtils.copyProperties(user, vo);
-        // 默认设置为active状态，如果数据库中有status字段则不需要这行
-        vo.setStatus("active");
         return vo;
     }
 }

@@ -8,29 +8,30 @@
         <result property="name" column="name"/>
         <result property="code" column="code"/>
         <result property="description" column="description"/>
+        <result property="isDelete" column="is_delete"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
     <!-- 查询所有部门 -->
     <select id="selectAll" resultMap="DepartmentResultMap">
-        SELECT * FROM department ORDER BY created_at DESC
+        SELECT * FROM departments WHERE is_delete = 0 ORDER BY created_at DESC
     </select>
 
     <!-- 根据ID查询部门 -->
     <select id="selectById" resultMap="DepartmentResultMap">
-        SELECT * FROM department WHERE id = #{id}
+        SELECT * FROM departments WHERE id = #{id} AND is_delete = 0
     </select>
 
     <!-- 插入部门 -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO department (name, code, description, created_at, updated_at)
+        INSERT INTO departments (name, code, description, created_at, updated_at)
         VALUES (#{name}, #{code}, #{description}, NOW(), NOW())
     </insert>
 
     <!-- 更新部门信息 -->
     <update id="updateById">
-        UPDATE department
+        UPDATE departments
         <set>
             <if test="name != null">name = #{name},</if>
             <if test="code != null">code = #{code},</if>
@@ -40,9 +41,9 @@
         WHERE id = #{id}
     </update>
 
-    <!-- 删除部门 -->
-    <delete id="deleteById">
-        DELETE FROM department WHERE id = #{id}
-    </delete>
+    <!-- 逻辑删除部门 -->
+    <update id="deleteById">
+        UPDATE departments SET is_delete = 1, updated_at = NOW() WHERE id = #{id}
+    </update>
 
 </mapper>
