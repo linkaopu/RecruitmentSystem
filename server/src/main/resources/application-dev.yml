@@ -16,3 +16,20 @@ serve:
       test-while-idle: true
       test-on-borrow: false
       test-on-return: false
+  # 邮件配置（QQ邮箱）
+  mail:
+    host: smtp.qq.com
+    port: 587
+    username: 3099231300@qq.com
+    password: wfdtfivakurhddbj
+    protocol: smtp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          ssl:
+            trust: smtp.qq.com
+            protocols: TLSv1.2

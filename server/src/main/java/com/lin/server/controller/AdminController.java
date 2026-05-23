@@ -22,7 +22,7 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/api/admin")
 @RequiredArgsConstructor
 @Tag(name = "管理员模块", description = "管理员相关接口，包括用户管理、部门管理、系统日志等")
 public class AdminController {

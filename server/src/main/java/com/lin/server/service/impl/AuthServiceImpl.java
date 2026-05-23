@@ -40,10 +40,20 @@ public class AuthServiceImpl implements AuthService {
         
         // 根据登录类型进行验证
         User user;
-        if ("phone".equals(loginDTO.getType())) {
-            // 手机验证码登录（TODO: 需要实现验证码校验）
-            log.warn("手机验证码登录暂未实现");
-            throw AuthException.notLoggedIn();
+        if ("email".equals(loginDTO.getType())) {
+            // 邮箱验证码登录
+            log.info("使用邮箱验证码登录，用户名: {}", loginDTO.getUsername());
+            
+            // 验证邮箱验证码
+            if (!EmailCodeUtil.verifyCode(loginDTO.getUsername(), loginDTO.getCode())) {
+                throw new BusinessException("邮箱验证码错误或已过期");
+            }
+            
+            // 根据邮箱查找用户
+            user = userMapper.selectByEmail(loginDTO.getUsername());
+            if (user == null) {
+                throw UserException.notFound();
+            }
         } else {
             // 账号密码登录
             user = userMapper.selectByUsername(loginDTO.getUsername());
@@ -54,7 +64,7 @@ public class AuthServiceImpl implements AuthService {
             // 验证密码（前端传来的密码已经是MD5加密的，需要与数据库中的密码对比）
             String encryptedPassword = Md5Util.md5(loginDTO.getPassword());
             if (!encryptedPassword.equals(user.getPassword())) {
-                throw AuthException.invalidToken(); // 密码错误
+                throw UserException.passwordError(); // 密码错误
             }
         }
         
@@ -88,10 +98,19 @@ public class AuthServiceImpl implements AuthService {
             throw UserException.emailExists();
         }
         
-        // 检查手机号是否已存在
-        existingUser = userMapper.selectByPhone(registerDTO.getPhone());
-        if (existingUser != null) {
-            throw UserException.phoneExists();
+        // 如果提供了手机号，检查手机号是否已存在
+        if (registerDTO.getPhone() != null && !registerDTO.getPhone().isEmpty()) {
+            existingUser = userMapper.selectByPhone(registerDTO.getPhone());
+            if (existingUser != null) {
+                throw UserException.phoneExists();
+            }
+        }
+        
+        // 验证邮箱验证码（如果提供了验证码）
+        if (registerDTO.getCode() != null && !registerDTO.getCode().isEmpty()) {
+            if (!EmailCodeUtil.verifyCode(registerDTO.getEmail(), registerDTO.getCode())) {
+                throw new BusinessException("邮箱验证码错误或已过期");
+            }
         }
         
         // 创建用户
@@ -130,12 +149,6 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void sendCode(String email) {
         log.info("发送邮箱验证码，邮箱: {}", email);
-        
-        // 检查邮箱是否存在
-        User user = userMapper.selectByEmail(email);
-        if (user == null) {
-            throw UserException.notFound();
-        }
         
         // 检查发送频率限制
         if (!EmailCodeUtil.canSendCode(email)) {

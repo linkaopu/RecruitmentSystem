@@ -23,6 +23,22 @@ spring:
       test-while-idle: ${serve.datasource.druid.test-while-idle}
       test-on-borrow: ${serve.datasource.druid.test-on-borrow}
       test-on-return: ${serve.datasource.druid.test-on-return}
+  # 邮件配置（QQ邮箱）
+  mail:
+        host: ${serve.mail.host}
+        port: ${serve.mail.port}
+        username: ${serve.mail.username}
+        password: ${serve.mail.password}
+        protocol: ${serve.mail.protocol}
+        properties:
+          mail:
+            smtp:
+              auth: ${serve.mail.properties.mail.smtp.auth}
+              starttls:
+                enable: ${serve.mail.properties.mail.smtp.starttls.enable}
+                required: ${serve.mail.properties.mail.smtp.starttls.required}
+              ssl:
+                trust: ${serve.mail.properties.mail.smtp.ssl.trust}
 
 # MyBatis配置
 mybatis:
@@ -40,20 +56,3 @@ logging:
         service: info
         controller: info
 
-# 邮件配置（QQ邮箱）
-spring:
-  mail:
-    host: smtp.qq.com
-    port: 587
-    username: ${MAIL_USERNAME:your-qq-email@qq.com}
-    password: ${MAIL_PASSWORD:your-authorization-code}
-    protocol: smtp
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-          ssl:
-            trust: smtp.qq.com

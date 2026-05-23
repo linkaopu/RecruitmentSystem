@@ -2,8 +2,11 @@ package com.lin.server.controller;
 
 import com.lin.common.result.Result;
 import com.lin.common.utils.JwtUtil;
+import com.lin.pojo.dto.ChangePasswordDTO;
 import com.lin.pojo.dto.LoginDTO;
 import com.lin.pojo.dto.RegisterDTO;
+import com.lin.pojo.dto.ResetPasswordDTO;
+import com.lin.pojo.dto.SendCodeDTO;
 import com.lin.pojo.vo.LoginVO;
 import com.lin.server.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Tag(name = "认证模块", description = "用户登录、注册、登出等认证相关接口")
 public class AuthController {
@@ -69,9 +72,9 @@ public class AuthController {
      */
     @PostMapping("/send-code")
     @Operation(summary = "发送邮箱验证码", description = "向指定邮箱发送6位验证码")
-    public Result<Void> sendCode(@RequestBody SendCodeRequest request) {
-        log.info("收到发送验证码请求，邮箱: {}", request.getEmail());
-        authService.sendCode(request.getEmail());
+    public Result<Void> sendCode(@Valid @RequestBody SendCodeDTO sendCodeDTO) {
+        log.info("收到发送验证码请求，邮箱: {}", sendCodeDTO.getEmail());
+        authService.sendCode(sendCodeDTO.getEmail());
         return Result.success("验证码已发送", null);
     }
     
@@ -80,9 +83,9 @@ public class AuthController {
      */
     @PostMapping("/reset-password")
     @Operation(summary = "重置密码", description = "通过邮箱验证码重置密码")
-    public Result<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
-        log.info("收到重置密码请求，邮箱: {}", request.getEmail());
-        authService.resetPassword(request.getEmail(), request.getCode(), request.getPassword());
+    public Result<Void> resetPassword(@Valid @RequestBody ResetPasswordDTO resetPasswordDTO) {
+        log.info("收到重置密码请求，邮箱: {}", resetPasswordDTO.getEmail());
+        authService.resetPassword(resetPasswordDTO.getEmail(), resetPasswordDTO.getCode(), resetPasswordDTO.getPassword());
         return Result.success("密码重置成功", null);
     }
     
@@ -94,43 +97,14 @@ public class AuthController {
     public Result<Void> changePassword(
             @Parameter(description = "JWT Token", required = true) 
             @RequestHeader("Authorization") String token,
-            @RequestBody ChangePasswordRequest request) {
+            @Valid @RequestBody ChangePasswordDTO changePasswordDTO) {
         // 移除Bearer前缀并解析用户ID
         String pureToken = JwtUtil.extractToken(token);
         Integer userId = JwtUtil.getUserIdFromToken(pureToken);
         if (userId == null) {
             throw new IllegalArgumentException("无效的Token");
         }
-        authService.changePassword(userId, request.getOldPassword(), request.getNewPassword());
+        authService.changePassword(userId, changePasswordDTO.getOldPassword(), changePasswordDTO.getNewPassword());
         return Result.success("密码修改成功", null);
-    }
-    
-    // ==================== 内部请求类 ====================
-    
-    /**
-     * 发送验证码请求
-     */
-    @lombok.Data
-    static class SendCodeRequest {
-        private String email;
-    }
-    
-    /**
-     * 重置密码请求
-     */
-    @lombok.Data
-    static class ResetPasswordRequest {
-        private String email;
-        private String code;
-        private String password;
-    }
-    
-    /**
-     * 修改密码请求
-     */
-    @lombok.Data
-    static class ChangePasswordRequest {
-        private String oldPassword;
-        private String newPassword;
     }
 }

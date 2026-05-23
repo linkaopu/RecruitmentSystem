@@ -20,9 +20,9 @@ public class LoginDTO {
     @Schema(description = "密码", example = "123456")
     private String password;
     
-    @Schema(description = "登录类型: account-账号密码, phone-手机验证码", example = "account")
+    @Schema(description = "登录类型: account-账号密码, email-邮箱验证码", example = "account")
     private String type;
     
-    @Schema(description = "手机验证码（type为phone时必填）", example = "123456")
+    @Schema(description = "邮箱验证码（type为email时必填）", example = "123456")
     private String code;
 }

@@ -26,15 +26,13 @@ public class RegisterDTO {
     @Schema(description = "邮箱", example = "zhangsan@example.com")
     private String email;
     
-    @NotBlank(message = "手机号不能为空")
-    @Pattern(regexp = "^1[3-9]\\d{9}$", message = "手机号格式不正确")
-    @Schema(description = "手机号", example = "13800138000")
+    @Schema(description = "手机号（可选）", example = "13800138000")
     private String phone;
     
     @NotBlank(message = "角色不能为空")
     @Schema(description = "用户角色: candidate-求职者, hr-HR, admin-管理员", example = "candidate")
     private String role;
     
-    @Schema(description = "手机验证码（可选）", example = "123456")
+    @Schema(description = "邮箱验证码（可选）", example = "123456")
     private String code;
 }
