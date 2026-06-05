@@ -2,7 +2,7 @@ package com.lin.server.service.impl;
 
 import com.lin.common.exception.UserException;
 import com.lin.common.result.PageResult;
-import com.lin.common.utils.Md5Util;
+import com.lin.common.util.Md5Util;
 import com.lin.pojo.dto.CreateUserDTO;
 import com.lin.pojo.dto.UpdateUserDTO;
 import com.lin.pojo.dto.UserQueryDTO;
@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
                 .map(this::convertToVO)
                 .collect(Collectors.toList());
         
-        return PageResult.of(query.getPageNum(), query.getPageSize(), total, userVOList);
+        return PageResult.of(query.getPage(), query.getPageSize(), total, userVOList);
     }
     
     @Override

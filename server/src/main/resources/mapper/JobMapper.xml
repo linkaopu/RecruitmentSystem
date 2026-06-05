@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lin.server.mapper.JobMapper">
+
+    <!-- 职位结果映射 -->
+    <resultMap id="JobResultMap" type="com.lin.pojo.entity.Job">
+        <id property="id" column="id"/>
+        <result property="hrId" column="hr_id"/>
+        <result property="departmentId" column="department_id"/>
+        <result property="title" column="title"/>
+        <result property="location" column="location"/>
+        <result property="salaryMin" column="salary_min"/>
+        <result property="salaryMax" column="salary_max"/>
+        <result property="salaryDisplay" column="salary_display"/>
+        <result property="isNegotiable" column="is_negotiable"/>
+        <result property="education" column="education"/>
+        <result property="experience" column="experience"/>
+        <result property="headcount" column="headcount"/>
+        <result property="description" column="description"/>
+        <result property="requirements" column="requirements"/>
+        <result property="benefits" column="benefits"/>
+        <result property="status" column="status"/>
+        <result property="deadline" column="deadline"/>
+        <result property="viewCount" column="view_count"/>
+        <result property="applyCount" column="apply_count"/>
+        <result property="isHot" column="is_hot"/>
+        <result property="approvedBy" column="approved_by"/>
+        <result property="approvedAt" column="approved_at"/>
+        <result property="isDelete" column="is_delete"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- 分页查询职位列表 -->
+    <select id="selectJobs" resultMap="JobResultMap">
+        SELECT *
+        FROM jobs
+        WHERE is_delete = 0
+        <if test="keyword != null and keyword != ''">
+            AND (title LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="departmentId != null">
+            AND department_id = #{departmentId}
+        </if>
+        <if test="location != null and location != ''">
+            AND location = #{location}
+        </if>
+        <if test="salaryMin != null">
+            AND salary_min <![CDATA[ >= ]]> #{salaryMin}
+        </if>
+        <if test="salaryMax != null">
+            AND salary_max <![CDATA[ <= ]]> #{salaryMax}
+        </if>
+        <if test="education != null and education != ''">
+            AND education = #{education}
+        </if>
+        <if test="experience != null and experience != ''">
+            AND experience = #{experience}
+        </if>
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="hrId != null">
+            AND hr_id = #{hrId}
+        </if>
+        <choose>
+            <when test="sortBy == 'salary'">
+                ORDER BY salary_max DESC
+            </when>
+            <when test="sortBy == 'hot'">
+                ORDER BY view_count DESC
+            </when>
+            <otherwise>
+                ORDER BY created_at DESC
+            </otherwise>
+        </choose>
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 查询职位总数 -->
+    <select id="countJobs" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM jobs
+        WHERE is_delete = 0
+        <if test="keyword != null and keyword != ''">
+            AND (title LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="departmentId != null">
+            AND department_id = #{departmentId}
+        </if>
+        <if test="location != null and location != ''">
+            AND location = #{location}
+        </if>
+        <if test="salaryMin != null">
+            AND salary_min <![CDATA[ >= ]]> #{salaryMin}
+        </if>
+        <if test="salaryMax != null">
+            AND salary_max <![CDATA[ <= ]]> #{salaryMax}
+        </if>
+        <if test="education != null and education != ''">
+            AND education = #{education}
+        </if>
+        <if test="experience != null and experience != ''">
+            AND experience = #{experience}
+        </if>
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        <if test="hrId != null">
+            AND hr_id = #{hrId}
+        </if>
+    </select>
+
+    <!-- 根据ID查询职位详情 -->
+    <select id="selectById" resultMap="JobResultMap">
+        SELECT *
+        FROM jobs
+        WHERE id = #{id} AND is_delete = 0
+    </select>
+
+    <!-- 获取热门职位 -->
+    <select id="selectHotJobs" resultMap="JobResultMap">
+        SELECT *
+        FROM jobs
+        WHERE is_delete = 0 AND status = 'active' AND is_hot = 1
+        ORDER BY view_count DESC
+        LIMIT 10
+    </select>
+
+    <!-- 获取最新职位 -->
+    <select id="selectLatestJobs" resultMap="JobResultMap">
+        SELECT *
+        FROM jobs
+        WHERE is_delete = 0 AND status = 'active'
+        ORDER BY created_at DESC
+        LIMIT 10
+    </select>
+
+    <!-- 插入职位记录 -->
+    <insert id="insert" parameterType="com.lin.pojo.entity.Job" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO jobs (
+            hr_id, department_id, title, location, salary_min, salary_max, salary_display,
+            is_negotiable, education, experience, headcount, description, requirements, benefits,
+            status, deadline, view_count, apply_count, is_hot, created_at, updated_at
+        ) VALUES (
+            #{hrId}, #{departmentId}, #{title}, #{location}, #{salaryMin}, #{salaryMax}, #{salaryDisplay},
+            #{isNegotiable}, #{education}, #{experience}, #{headcount}, #{description}, #{requirements}, #{benefits},
+            #{status}, #{deadline}, #{viewCount}, #{applyCount}, #{isHot}, #{createdAt}, #{updatedAt}
+        )
+    </insert>
+
+    <!-- 更新职位记录 -->
+    <update id="updateById" parameterType="com.lin.pojo.entity.Job">
+        UPDATE jobs
+        SET
+            hr_id = #{hrId},
+            department_id = #{departmentId},
+            title = #{title},
+            location = #{location},
+            salary_min = #{salaryMin},
+            salary_max = #{salaryMax},
+            salary_display = #{salaryDisplay},
+            is_negotiable = #{isNegotiable},
+            education = #{education},
+            experience = #{experience},
+            headcount = #{headcount},
+            description = #{description},
+            requirements = #{requirements},
+            benefits = #{benefits},
+            status = #{status},
+            deadline = #{deadline},
+            view_count = #{viewCount},
+            apply_count = #{applyCount},
+            is_hot = #{isHot},
+            updated_at = #{updatedAt}
+        WHERE id = #{id} AND is_delete = 0
+    </update>
+
+    <!-- 更新职位状态 -->
+    <update id="updateStatus">
+        UPDATE jobs
+        SET status = #{status}, updated_at = NOW()
+        WHERE id = #{id} AND is_delete = 0
+    </update>
+
+    <!-- 逻辑删除职位记录 -->
+    <update id="deleteById">
+        UPDATE jobs
+        SET is_delete = 1, updated_at = NOW()
+        WHERE id = #{id} AND is_delete = 0
+    </update>
+
+    <!-- 增加浏览量 -->
+    <update id="incrementViewCount">
+        UPDATE jobs
+        SET view_count = view_count + 1, updated_at = NOW()
+        WHERE id = #{id} AND is_delete = 0
+    </update>
+
+    <!-- 增加申请数 -->
+    <update id="incrementApplyCount">
+        UPDATE jobs
+        SET apply_count = apply_count + 1, updated_at = NOW()
+        WHERE id = #{id} AND is_delete = 0
+    </update>
+
+    <!-- 获取职位统计数据 -->
+    <select id="selectStatsById" resultMap="JobResultMap">
+        SELECT view_count, apply_count
+        FROM jobs
+        WHERE id = #{id} AND is_delete = 0
+    </select>
+
+</mapper>

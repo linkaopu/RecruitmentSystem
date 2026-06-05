@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lin.server.mapper.FavoriteMapper">
+
+    <!-- 职位结果映射 -->
+    <resultMap id="JobResultMap" type="com.lin.pojo.entity.Job">
+        <id property="id" column="job_id"/>
+        <result property="title" column="job_title"/>
+        <result property="departmentId" column="job_departmentId"/>
+        <result property="location" column="job_location"/>
+        <result property="salaryMin" column="job_salaryMin"/>
+        <result property="salaryMax" column="job_salaryMax"/>
+        <result property="salaryDisplay" column="job_salaryDisplay"/>
+        <result property="education" column="job_education"/>
+        <result property="experience" column="job_experience"/>
+        <result property="headcount" column="job_headcount"/>
+        <result property="description" column="job_description"/>
+        <result property="requirements" column="job_requirements"/>
+        <result property="benefits" column="job_benefits"/>
+        <result property="status" column="job_status"/>
+        <result property="viewCount" column="job_viewCount"/>
+        <result property="applyCount" column="job_applyCount"/>
+        <result property="isHot" column="job_isHot"/>
+        <result property="createdAt" column="job_createdAt"/>
+        <result property="updatedAt" column="job_updatedAt"/>
+    </resultMap>
+
+    <!-- 收藏VO结果映射 -->
+    <resultMap id="FavoriteVOResultMap" type="com.lin.pojo.vo.FavoriteVO">
+        <id property="id" column="id"/>
+        <result property="userId" column="userId"/>
+        <result property="jobId" column="jobId"/>
+        <result property="createdAt" column="createdAt"/>
+        <association property="job" resultMap="JobResultMap"/>
+    </resultMap>
+
+    <!-- 分页查询收藏列表（包含职位详情） -->
+    <select id="selectFavoritesByUserId" resultMap="FavoriteVOResultMap">
+        SELECT 
+            f.id,
+            f.user_id AS userId,
+            f.job_id AS jobId,
+            f.created_at AS createdAt,
+            j.id AS job_id,
+            j.title AS job_title,
+            j.department_id AS job_departmentId,
+            j.location AS job_location,
+            j.salary_min AS job_salaryMin,
+            j.salary_max AS job_salaryMax,
+            j.salary_display AS job_salaryDisplay,
+            j.education AS job_education,
+            j.experience AS job_experience,
+            j.headcount AS job_headcount,
+            j.description AS job_description,
+            j.requirements AS job_requirements,
+            j.benefits AS job_benefits,
+            j.status AS job_status,
+            j.view_count AS job_viewCount,
+            j.apply_count AS job_applyCount,
+            j.is_hot AS job_isHot,
+            j.created_at AS job_createdAt,
+            j.updated_at AS job_updatedAt
+        FROM favorites f
+        LEFT JOIN jobs j ON f.job_id = j.id AND j.is_delete = 0
+        WHERE f.user_id = #{userId} 
+        AND f.is_delete = 0
+        ORDER BY f.created_at DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 查询所有收藏列表（不分页） -->
+    <select id="selectAllFavoritesByUserId" resultMap="FavoriteVOResultMap">
+        SELECT 
+            f.id,
+            f.user_id AS userId,
+            f.job_id AS jobId,
+            f.created_at AS createdAt,
+            j.id AS job_id,
+            j.title AS job_title,
+            j.department_id AS job_departmentId,
+            j.location AS job_location,
+            j.salary_min AS job_salaryMin,
+            j.salary_max AS job_salaryMax,
+            j.salary_display AS job_salaryDisplay,
+            j.education AS job_education,
+            j.experience AS job_experience,
+            j.headcount AS job_headcount,
+            j.description AS job_description,
+            j.requirements AS job_requirements,
+            j.benefits AS job_benefits,
+            j.status AS job_status,
+            j.view_count AS job_viewCount,
+            j.apply_count AS job_applyCount,
+            j.is_hot AS job_isHot,
+            j.created_at AS job_createdAt,
+            j.updated_at AS job_updatedAt
+        FROM favorites f
+        LEFT JOIN jobs j ON f.job_id = j.id AND j.is_delete = 0
+        WHERE f.user_id = #{userId} 
+        AND f.is_delete = 0
+        ORDER BY f.created_at DESC
+    </select>
+
+    <!-- 查询收藏总数 -->
+    <select id="countByUserId" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM favorites
+        WHERE user_id = #{userId} AND is_delete = 0
+    </select>
+
+    <!-- 根据用户ID和职位ID查询收藏 -->
+    <select id="selectByUserIdAndJobId" resultType="com.lin.pojo.entity.Favorite">
+        SELECT *
+        FROM favorites
+        WHERE user_id = #{userId} 
+        AND job_id = #{jobId}
+        AND is_delete = 0
+    </select>
+
+    <!-- 插入收藏 -->
+    <insert id="insert" parameterType="com.lin.pojo.entity.Favorite" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO favorites (user_id, job_id, created_at)
+        VALUES (#{userId}, #{jobId}, #{createdAt})
+    </insert>
+
+    <!-- 逻辑删除收藏 -->
+    <update id="deleteByUserIdAndJobId">
+        UPDATE favorites
+        SET is_delete = 1
+        WHERE user_id = #{userId} AND job_id = #{jobId}
+    </update>
+
+    <!-- 检查是否已收藏 -->
+    <select id="checkIsFavorite" resultType="boolean">
+        SELECT EXISTS(
+            SELECT 1
+            FROM favorites
+            WHERE user_id = #{userId} 
+            AND job_id = #{jobId}
+            AND is_delete = 0
+        )
+    </select>
+
+</mapper>

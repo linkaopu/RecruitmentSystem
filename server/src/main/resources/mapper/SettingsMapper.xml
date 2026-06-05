@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lin.server.mapper.SettingsMapper">
+
+    <resultMap id="SettingsResultMap" type="com.lin.pojo.entity.Settings">
+        <id property="id" column="id"/>
+        <result property="siteName" column="site_name"/>
+        <result property="companyName" column="company_name"/>
+        <result property="contactPhone" column="contact_phone"/>
+        <result property="contactEmail" column="contact_email"/>
+        <result property="address" column="address"/>
+        <result property="description" column="description"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- 查询唯一配置 -->
+    <select id="selectById" resultMap="SettingsResultMap">
+        SELECT id, site_name, company_name, contact_phone, contact_email,
+               address, description, created_at, updated_at
+        FROM settings
+        WHERE id = 1
+    </select>
+
+    <!-- 插入默认配置 -->
+    <insert id="insert">
+        INSERT INTO settings (id, site_name, company_name, contact_phone, contact_email,
+                              address, description, created_at, updated_at)
+        VALUES (1, #{siteName}, #{companyName}, #{contactPhone}, #{contactEmail},
+                #{address}, #{description}, NOW(), NOW())
+    </insert>
+
+    <!-- 更新配置 -->
+    <update id="update">
+        UPDATE settings
+        SET site_name     = #{siteName},
+            company_name  = #{companyName},
+            contact_phone = #{contactPhone},
+            contact_email = #{contactEmail},
+            address       = #{address},
+            description   = #{description},
+            updated_at    = NOW()
+        WHERE id = 1
+    </update>
+
+</mapper>

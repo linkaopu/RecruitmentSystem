@@ -43,6 +43,6 @@ public class CreateUserDTO {
     /**
      * 头像URL
      */
-    @Schema(description = "头像URL", example = "http://example.com/avatar.jpg")
+    @Schema(description = "头像URL", example = "http://example.com/avatar.jpg" )
     private String avatar;
 }

@@ -10,5 +10,5 @@ public interface DashboardService {
     /**
      * 获取仪表盘统计数据
      */
-    DashboardStatsVO getDashboardStats();
+    DashboardStatsVO getDashboardStats(Integer hrId);
 }

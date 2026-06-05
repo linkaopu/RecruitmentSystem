@@ -69,4 +69,16 @@ public class Application {
      * 更新时间
      */
     private LocalDateTime updatedAt;
+
+    // ========== 关联数据（JOIN查询时填充） ==========
+
+    /**
+     * 关联的职位信息
+     */
+    private Job job;
+
+    /**
+     * 关联的简历信息
+     */
+    private Resume resume;
 }

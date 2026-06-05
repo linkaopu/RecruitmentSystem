@@ -35,7 +35,7 @@
             </if>
         </where>
         ORDER BY created_at DESC
-        LIMIT #{query.pageSize} OFFSET ${(query.pageNum - 1) * query.pageSize}
+        LIMIT #{query.pageSize} OFFSET ${(query.page - 1) * query.pageSize}
     </select>
 
     <!-- 统计用户总数 -->

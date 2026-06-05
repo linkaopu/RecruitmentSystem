@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.Map;
+import java.util.List;
 
 /**
  * 项目经历实体类
@@ -54,7 +54,7 @@ public class ProjectExperience {
     /**
      * 使用技术(JSON格式)
      */
-    private Map<String, Object> technologies;
+    private List<String> technologies;
     
     /**
      * 是否删除：0-未删除，1-已删除

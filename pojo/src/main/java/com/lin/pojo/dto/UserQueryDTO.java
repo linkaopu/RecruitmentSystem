@@ -13,7 +13,7 @@ public class UserQueryDTO {
      * 页码
      */
     @Schema(description = "页码", example = "1")
-    private Integer pageNum = 1;
+    private Integer page = 1;
     
     /**
      * 每页数量

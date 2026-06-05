@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lin.server.mapper.ProjectExperienceMapper">
+
+    <resultMap id="ProjectExperienceResultMap" type="com.lin.pojo.entity.ProjectExperience">
+        <id property="id" column="id"/>
+        <result property="resumeId" column="resume_id"/>
+        <result property="name" column="name"/>
+        <result property="role" column="role"/>
+        <result property="startDate" column="start_date"/>
+        <result property="endDate" column="end_date"/>
+        <result property="description" column="description"/>
+        <result property="technologies" column="technologies"
+                javaType="java.util.List" jdbcType="OTHER"
+                typeHandler="com.lin.server.util.ListTypeHandler"/>
+        <result property="isDelete" column="is_delete"/>
+    </resultMap>
+
+    <select id="selectByResumeId" resultMap="ProjectExperienceResultMap">
+        SELECT * FROM project_experiences
+        WHERE resume_id = #{resumeId} AND is_delete = 0
+        ORDER BY start_date DESC
+    </select>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO project_experiences (resume_id, name, role, start_date, end_date, description, technologies)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.resumeId}, #{item.name}, #{item.role},
+             #{item.startDate}, #{item.endDate}, #{item.description},
+             #{item.technologies, jdbcType=OTHER, typeHandler=com.lin.server.util.ListTypeHandler})
+        </foreach>
+    </insert>
+
+    <update id="deleteByResumeId">
+        UPDATE project_experiences
+        SET is_delete = 1
+        WHERE resume_id = #{resumeId} AND is_delete = 0
+    </update>
+
+</mapper>

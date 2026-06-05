@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lin.server.mapper.WorkExperienceMapper">
+
+    <resultMap id="WorkExperienceResultMap" type="com.lin.pojo.entity.WorkExperience">
+        <id property="id" column="id"/>
+        <result property="resumeId" column="resume_id"/>
+        <result property="company" column="company"/>
+        <result property="position" column="position"/>
+        <result property="startDate" column="start_date"/>
+        <result property="endDate" column="end_date"/>
+        <result property="isCurrent" column="is_current"/>
+        <result property="description" column="description"/>
+        <result property="isDelete" column="is_delete"/>
+    </resultMap>
+
+    <select id="selectByResumeId" resultMap="WorkExperienceResultMap">
+        SELECT * FROM work_experiences
+        WHERE resume_id = #{resumeId} AND is_delete = 0
+        ORDER BY start_date DESC
+    </select>
+
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO work_experiences (resume_id, company, position, start_date, end_date, is_current, description)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.resumeId}, #{item.company}, #{item.position},
+             #{item.startDate}, #{item.endDate}, #{item.isCurrent}, #{item.description})
+        </foreach>
+    </insert>
+
+    <update id="deleteByResumeId">
+        UPDATE work_experiences
+        SET is_delete = 1
+        WHERE resume_id = #{resumeId} AND is_delete = 0
+    </update>
+
+</mapper>

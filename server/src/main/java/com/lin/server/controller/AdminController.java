@@ -4,6 +4,7 @@ import com.lin.common.result.Result;
 import com.lin.common.result.PageResult;
 import com.lin.pojo.dto.*;
 import com.lin.pojo.entity.Department;
+import com.lin.pojo.entity.Settings;
 import com.lin.pojo.entity.SystemLog;
 import com.lin.pojo.vo.DashboardStatsVO;
 import com.lin.pojo.vo.UserVO;
@@ -22,18 +23,19 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/admin")
 @RequiredArgsConstructor
 @Tag(name = "管理员模块", description = "管理员相关接口，包括用户管理、部门管理、系统日志等")
 public class AdminController {
-    
+
     private final UserService userService;
     private final DepartmentService departmentService;
     private final SystemLogService systemLogService;
     private final DashboardService dashboardService;
-    
+    private final SettingsService settingsService;
+
     // ==================== 用户管理 ====================
-    
+
     /**
      * 分页查询用户列表
      */
@@ -44,7 +46,18 @@ public class AdminController {
         PageResult<UserVO> result = userService.getUsers(query);
         return Result.success(result);
     }
-    
+
+    /**
+     * 获取用户详情
+     */
+    @GetMapping("/users/{id}")
+    @Operation(summary = "获取用户详情", description = "根据ID获取用户详情信息")
+    public Result<UserVO> getUserDetail(@Parameter(description = "用户ID") @PathVariable Integer id) {
+        log.info("获取用户详情，ID: {}", id);
+        UserVO user = userService.getUserById(id);
+        return Result.success(user);
+    }
+
     /**
      * 创建用户
      */
@@ -55,19 +68,19 @@ public class AdminController {
         UserVO user = userService.createUser(createUserDTO);
         return Result.success("用户创建成功", user);
     }
-    
+
     /**
      * 更新用户信息
      */
     @PutMapping("/users/{id}")
     @Operation(summary = "更新用户信息", description = "根据ID更新用户的基本信息")
-    public Result<UserVO> updateUser(@Parameter(description = "用户ID") @PathVariable Integer id, 
-                                     @RequestBody UpdateUserDTO updateUserDTO) {
+    public Result<UserVO> updateUser(@Parameter(description = "用户ID") @PathVariable Integer id,
+            @RequestBody UpdateUserDTO updateUserDTO) {
         log.info("更新用户信息，ID: {}, 参数: {}", id, updateUserDTO);
         UserVO user = userService.updateUser(id, updateUserDTO);
         return Result.success("用户更新成功", user);
     }
-    
+
     /**
      * 删除用户
      */
@@ -78,9 +91,9 @@ public class AdminController {
         userService.deleteUser(id);
         return Result.success("用户删除成功", null);
     }
-    
+
     // ==================== 部门管理 ====================
-    
+
     /**
      * 查询所有部门
      */
@@ -91,7 +104,18 @@ public class AdminController {
         List<Department> departments = departmentService.getDepartments();
         return Result.success(departments);
     }
-    
+
+    /**
+     * 获取部门详情
+     */
+    @GetMapping("/departments/{id}")
+    @Operation(summary = "获取部门详情", description = "根据ID获取部门详情信息")
+    public Result<Department> getDepartmentDetail(@Parameter(description = "部门ID") @PathVariable Integer id) {
+        log.info("获取部门详情，ID: {}", id);
+        Department department = departmentService.getDepartmentById(id);
+        return Result.success(department);
+    }
+
     /**
      * 创建部门
      */
@@ -102,19 +126,19 @@ public class AdminController {
         Department department = departmentService.createDepartment(createDepartmentDTO);
         return Result.success("部门创建成功", department);
     }
-    
+
     /**
      * 更新部门信息
      */
     @PutMapping("/departments/{id}")
     @Operation(summary = "更新部门信息", description = "根据ID更新部门的基本信息")
     public Result<Department> updateDepartment(@Parameter(description = "部门ID") @PathVariable Integer id,
-                                               @RequestBody UpdateDepartmentDTO updateDepartmentDTO) {
+            @RequestBody UpdateDepartmentDTO updateDepartmentDTO) {
         log.info("更新部门信息，ID: {}, 参数: {}", id, updateDepartmentDTO);
         Department department = departmentService.updateDepartment(id, updateDepartmentDTO);
         return Result.success("部门更新成功", department);
     }
-    
+
     /**
      * 删除部门
      */
@@ -125,56 +149,58 @@ public class AdminController {
         departmentService.deleteDepartment(id);
         return Result.success("部门删除成功", null);
     }
-    
+
     // ==================== 系统日志 ====================
-    
+
     /**
      * 分页查询系统日志
      */
     @GetMapping("/logs")
     @Operation(summary = "分页查询系统日志", description = "获取系统操作日志列表")
     public Result<PageResult<SystemLog>> getSystemLogs(
-            @Parameter(description = "页码") @RequestParam(defaultValue = "1") Integer pageNum,
+            @Parameter(description = "页码") @RequestParam(defaultValue = "1") Integer page,
             @Parameter(description = "每页数量") @RequestParam(defaultValue = "10") Integer pageSize) {
-        log.info("查询系统日志，页码: {}, 每页数量: {}", pageNum, pageSize);
-        PageResult<SystemLog> result = systemLogService.getSystemLogs(pageNum, pageSize);
+        log.info("查询系统日志，页码: {}, 每页数量: {}", page, pageSize);
+        PageResult<SystemLog> result = systemLogService.getSystemLogs(page, pageSize);
         return Result.success(result);
     }
-    
+
     // ==================== 仪表盘数据 ====================
-    
+
     /**
      * 获取仪表盘统计数据
      */
     @GetMapping("/dashboard/stats")
     @Operation(summary = "获取仪表盘统计数据", description = "获取今日申请数、总职位数、待处理简历数等统计信息")
-    public Result<DashboardStatsVO> getDashboardStats() {
-        log.info("获取仪表盘统计数据");
-        DashboardStatsVO stats = dashboardService.getDashboardStats();
+    public Result<DashboardStatsVO> getDashboardStats(
+            @Parameter(description = "负责HR用户ID") @RequestParam(required = false) Integer hrId) {
+        log.info("获取仪表盘统计数据，hrId: {}", hrId);
+        DashboardStatsVO stats = dashboardService.getDashboardStats(hrId);
         return Result.success(stats);
     }
-    
+
     // ==================== 系统设置 ====================
-    
+
     /**
      * 获取系统设置
      */
     @GetMapping("/settings")
-    @Operation(summary = "获取系统设置", description = "获取系统配置信息")
-    public Result<Object> getSystemSettings() {
+    @Operation(summary = "获取系统设置", description = "获取网站基础配置信息")
+    public Result<Settings> getSystemSettings() {
         log.info("获取系统设置");
-        // TODO: 实现系统设置查询逻辑
-        return Result.success(null);
+        Settings settings = settingsService.getSettings();
+        return Result.success(settings);
     }
-    
+
     /**
      * 更新系统设置
      */
     @PutMapping("/settings")
-    @Operation(summary = "更新系统设置", description = "更新系统配置信息")
-    public Result<Void> updateSystemSettings(@RequestBody Object settings) {
+    @Operation(summary = "更新系统设置", description = "更新网站基础配置信息")
+    public Result<Void> updateSystemSettings(@RequestBody Settings settings) {
         log.info("更新系统设置，参数: {}", settings);
-        // TODO: 实现系统设置更新逻辑
+        settingsService.updateSettings(settings);
         return Result.success("系统设置更新成功", null);
     }
+
 }

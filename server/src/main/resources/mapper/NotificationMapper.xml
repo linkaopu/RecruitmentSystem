@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lin.server.mapper.NotificationMapper">
+
+    <!-- 通知结果映射 -->
+    <resultMap id="NotificationResultMap" type="com.lin.pojo.entity.Notification">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="type" column="type"/>
+        <result property="isRead" column="is_read"/>
+        <result property="isDelete" column="is_delete"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <!-- 分页查询用户通知列表 -->
+    <select id="selectByUserId" resultMap="NotificationResultMap">
+        SELECT *
+        FROM notifications
+        WHERE user_id = #{userId} AND is_delete = 0
+        ORDER BY created_at DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 查询所有用户通知列表（不分页） -->
+    <select id="selectAllByUserId" resultMap="NotificationResultMap">
+        SELECT *
+        FROM notifications
+        WHERE user_id = #{userId} AND is_delete = 0
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 查询用户通知总数 -->
+    <select id="countByUserId" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM notifications
+        WHERE user_id = #{userId} AND is_delete = 0
+    </select>
+
+    <!-- 根据ID查询通知 -->
+    <select id="selectById" resultMap="NotificationResultMap">
+        SELECT *
+        FROM notifications
+        WHERE id = #{id} AND is_delete = 0
+    </select>
+
+    <!-- 更新通知为已读状态 -->
+    <update id="updateReadStatus">
+        UPDATE notifications
+        SET is_read = #{isRead}, updated_at = NOW()
+        WHERE id = #{id} AND is_delete = 0
+    </update>
+
+    <!-- 更新用户所有通知为已读状态 -->
+    <update id="updateAllReadStatus">
+        UPDATE notifications
+        SET is_read = true, updated_at = NOW()
+        WHERE user_id = #{userId} AND is_delete = 0
+    </update>
+
+    <!-- 逻辑删除通知 -->
+    <update id="deleteById">
+        UPDATE notifications
+        SET is_delete = 1, updated_at = NOW()
+        WHERE id = #{id} AND is_delete = 0
+    </update>
+
+    <!-- 插入通知记录 -->
+    <insert id="insert" parameterType="com.lin.pojo.entity.Notification" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO notifications (
+            user_id, title, content, type, is_read, is_delete, created_at
+        ) VALUES (
+            #{userId}, #{title}, #{content}, #{type}, #{isRead}, #{isDelete}, #{createdAt}
+        )
+    </insert>
+
+</mapper>

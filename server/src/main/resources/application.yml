@@ -39,6 +39,13 @@ spring:
                 required: ${serve.mail.properties.mail.smtp.starttls.required}
               ssl:
                 trust: ${serve.mail.properties.mail.smtp.ssl.trust}
+  #redis配置
+  data:
+    redis:
+      host: ${serve.data.redis.host}
+      port: ${serve.data.redis.port}
+      database: ${serve.data.redis.database}
+
 
 # MyBatis配置
 mybatis:
@@ -51,8 +58,8 @@ mybatis:
 logging:
   level:
     com:
-      sky:
-        mapper: debug
-        service: info
-        controller: info
+      lin:
+        server:
+          service: info
+          controller: info
 

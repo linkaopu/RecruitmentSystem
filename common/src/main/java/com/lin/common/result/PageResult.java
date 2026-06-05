@@ -11,7 +11,7 @@ public class PageResult<T> {
     /**
      * 当前页码
      */
-    private Integer pageNum;
+    private Integer page;
     
     /**
      * 每页数量
@@ -24,11 +24,6 @@ public class PageResult<T> {
     private Long total;
     
     /**
-     * 总页数
-     */
-    private Integer totalPages;
-    
-    /**
      * 数据列表
      */
     private java.util.List<T> list;
@@ -36,18 +31,17 @@ public class PageResult<T> {
     public PageResult() {
     }
     
-    public PageResult(Integer pageNum, Integer pageSize, Long total, java.util.List<T> list) {
-        this.pageNum = pageNum;
+    public PageResult(Integer page, Integer pageSize, Long total, java.util.List<T> list) {
+        this.page = page;
         this.pageSize = pageSize;
         this.total = total;
         this.list = list;
-        this.totalPages = (int) Math.ceil((double) total / pageSize);
     }
     
     /**
      * 构建分页结果
      */
-    public static <T> PageResult<T> of(Integer pageNum, Integer pageSize, Long total, java.util.List<T> list) {
-        return new PageResult<>(pageNum, pageSize, total, list);
+    public static <T> PageResult<T> of(Integer page, Integer pageSize, Long total, java.util.List<T> list) {
+        return new PageResult<>(page, pageSize, total, list);
     }
 }

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lin.server.mapper.InterviewMapper">
+
+    <!-- 面试结果映射 -->
+    <resultMap id="InterviewResultMap" type="com.lin.pojo.entity.Interview">
+        <id property="id" column="id"/>
+        <result property="applicationId" column="application_id"/>
+        <result property="jobId" column="job_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="resumeId" column="resume_id"/>
+        <result property="jobTitle" column="job_title"/>
+        <result property="userName" column="user_name"/>
+        <result property="interviewerId" column="interviewer_id"/>
+        <result property="interviewerName" column="interviewer_name"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="location" column="location"/>
+        <result property="method" column="method"/>
+        <result property="result" column="result"/>
+        <result property="notes" column="notes"/>
+        <result property="notified" column="notified"/>
+        <result property="isDelete" column="is_delete"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- 分页查询面试列表 -->
+    <select id="selectInterviews" resultMap="InterviewResultMap">
+        SELECT i.*
+        FROM interviews i
+        <if test="hrId != null">
+            INNER JOIN jobs j ON i.job_id = j.id AND j.is_delete = 0
+        </if>
+        WHERE i.is_delete = 0
+        <if test="hrId != null">
+            AND j.hr_id = #{hrId}
+        </if>
+        ORDER BY i.start_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 查询面试总数 -->
+    <select id="countInterviews" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM interviews i
+        <if test="hrId != null">
+            INNER JOIN jobs j ON i.job_id = j.id AND j.is_delete = 0
+        </if>
+        WHERE i.is_delete = 0
+        <if test="hrId != null">
+            AND j.hr_id = #{hrId}
+        </if>
+    </select>
+
+    <!-- 根据ID查询面试详情 -->
+    <select id="selectById" resultMap="InterviewResultMap">
+        SELECT *
+        FROM interviews
+        WHERE id = #{id} AND is_delete = 0
+    </select>
+
+    <!-- 插入面试记录 -->
+    <insert id="insert" parameterType="com.lin.pojo.entity.Interview" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO interviews (
+            application_id, job_id, user_id, resume_id, job_title, user_name,
+            interviewer_id, interviewer_name, start_time, end_time,
+            location, method, result, notes, notified,
+            created_at, updated_at
+        ) VALUES (
+            #{applicationId}, #{jobId}, #{userId}, #{resumeId}, #{jobTitle}, #{userName},
+            #{interviewerId}, #{interviewerName}, #{startTime}, #{endTime},
+            #{location}, #{method}, #{result}, #{notes}, #{notified},
+            #{createdAt}, #{updatedAt}
+        )
+    </insert>
+
+    <!-- 更新面试记录 -->
+    <update id="updateById" parameterType="com.lin.pojo.entity.Interview">
+        UPDATE interviews
+        SET
+            application_id = #{applicationId},
+            job_id = #{jobId},
+            user_id = #{userId},
+            resume_id = #{resumeId},
+            job_title = #{jobTitle},
+            user_name = #{userName},
+            interviewer_id = #{interviewerId},
+            interviewer_name = #{interviewerName},
+            start_time = #{startTime},
+            end_time = #{endTime},
+            location = #{location},
+            method = #{method},
+            result = #{result},
+            notes = #{notes},
+            notified = #{notified},
+            updated_at = #{updatedAt}
+        WHERE id = #{id} AND is_delete = 0
+    </update>
+
+    <!-- 更新面试结果 -->
+    <update id="updateResult">
+        UPDATE interviews
+        SET result = #{result}, notes = #{notes}, updated_at = NOW()
+        WHERE id = #{id} AND is_delete = 0
+    </update>
+
+    <!-- 逻辑删除面试记录 -->
+    <update id="deleteById">
+        UPDATE interviews
+        SET is_delete = 1, updated_at = NOW()
+        WHERE id = #{id} AND is_delete = 0
+    </update>
+
+    <!-- 更新通知状态 -->
+    <update id="updateNotified">
+        UPDATE interviews
+        SET notified = #{notified}, updated_at = NOW()
+        WHERE id = #{id} AND is_delete = 0
+    </update>
+
+    <!-- 根据日期范围查询面试日程 -->
+    <select id="selectByDateRange" resultMap="InterviewResultMap">
+        SELECT *
+        FROM interviews
+        WHERE is_delete = 0
+          AND start_time <![CDATA[ >= ]]> #{startDate}
+          AND start_time <![CDATA[ <= ]]> #{endDate}
+        ORDER BY start_time ASC
+    </select>
+
+    <!-- 统计待定面试数（result = 'pending'） -->
+    <select id="countPending" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM interviews i
+        <if test="hrId != null">
+            INNER JOIN jobs j ON i.job_id = j.id AND j.is_delete = 0
+        </if>
+        WHERE i.is_delete = 0 AND i.result = 'pending'
+        <if test="hrId != null">
+            AND j.hr_id = #{hrId}
+        </if>
+    </select>
+
+</mapper>

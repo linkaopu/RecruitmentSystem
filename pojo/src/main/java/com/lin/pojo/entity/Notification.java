@@ -21,10 +21,15 @@ public class Notification {
     private Integer id;
     
     /**
-     * 用户ID
+     * 用户ID（接收者）
      */
     private Integer userId;
-    
+
+    /**
+     * 发送者用户ID（NULL表示系统发送）
+     */
+    private Integer fromUserId;
+
     /**
      * 通知标题
      */
@@ -43,7 +48,7 @@ public class Notification {
     /**
      * 是否已读
      */
-    private Boolean isRead;
+    private Integer isRead;
     
     /**
      * 是否删除：0-未删除，1-已删除

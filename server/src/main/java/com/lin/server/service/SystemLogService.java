@@ -11,5 +11,5 @@ public interface SystemLogService {
     /**
      * 分页查询系统日志
      */
-    PageResult<SystemLog> getSystemLogs(Integer pageNum, Integer pageSize);
+    PageResult<SystemLog> getSystemLogs(Integer page, Integer pageSize);
 }

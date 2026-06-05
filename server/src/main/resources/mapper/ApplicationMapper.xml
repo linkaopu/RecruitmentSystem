@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lin.server.mapper.ApplicationMapper">
+
+    <!-- 申请结果映射 -->
+    <resultMap id="ApplicationResultMap" type="com.lin.pojo.entity.Application">
+        <id property="id" column="id"/>
+        <result property="jobId" column="job_id"/>
+        <result property="resumeId" column="resume_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="jobTitle" column="job_title"/>
+        <result property="status" column="status"/>
+        <result property="rejectReason" column="reject_reason"/>
+        <result property="appliedAt" column="applied_at"/>
+        <result property="isDelete" column="is_delete"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- 分页查询用户申请列表 -->
+    <select id="selectByUserId" resultMap="ApplicationResultMap">
+        SELECT *
+        FROM applications
+        WHERE user_id = #{userId} AND is_delete = 0
+        ORDER BY applied_at DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 查询用户申请总数 -->
+    <select id="countByUserId" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM applications
+        WHERE user_id = #{userId} AND is_delete = 0
+    </select>
+
+    <!-- 分页查询所有申请列表（管理员） -->
+    <select id="selectAll" resultMap="ApplicationResultMap">
+        SELECT a.*
+        FROM applications a
+        <if test="hrId != null">
+            INNER JOIN jobs j ON a.job_id = j.id AND j.is_delete = 0
+        </if>
+        WHERE a.is_delete = 0
+        <if test="status != null and status != ''">
+            AND a.status = #{status}
+        </if>
+        <if test="hrId != null">
+            AND j.hr_id = #{hrId}
+        </if>
+        ORDER BY a.applied_at DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 查询所有申请总数 -->
+    <select id="countAll" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM applications a
+        <if test="hrId != null">
+            INNER JOIN jobs j ON a.job_id = j.id AND j.is_delete = 0
+        </if>
+        WHERE a.is_delete = 0
+        <if test="status != null and status != ''">
+            AND a.status = #{status}
+        </if>
+        <if test="hrId != null">
+            AND j.hr_id = #{hrId}
+        </if>
+    </select>
+
+    <!-- 根据ID查询申请详情 -->
+    <select id="selectById" resultMap="ApplicationResultMap">
+        SELECT *
+        FROM applications
+        WHERE id = #{id} AND is_delete = 0
+    </select>
+
+    <!-- 检查用户是否已申请过该职位 -->
+    <select id="selectByUserIdAndJobId" resultMap="ApplicationResultMap">
+        SELECT *
+        FROM applications
+        WHERE user_id = #{userId} AND job_id = #{jobId} AND is_delete = 0
+    </select>
+
+    <!-- 插入申请记录 -->
+    <insert id="insert" parameterType="com.lin.pojo.entity.Application" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO applications (
+            job_id, resume_id, user_id, user_name, job_title,
+            status, reject_reason, applied_at, is_delete, updated_at
+        ) VALUES (
+            #{jobId}, #{resumeId}, #{userId}, #{userName}, #{jobTitle},
+            #{status}, #{rejectReason}, #{appliedAt}, 0, #{updatedAt}
+        )
+    </insert>
+
+    <!-- 更新申请状态 -->
+    <update id="updateStatus">
+        UPDATE applications
+        SET status = #{status},
+            <if test="rejectReason != null">
+                reject_reason = #{rejectReason},
+            </if>
+            updated_at = NOW()
+        WHERE id = #{id} AND is_delete = 0
+    </update>
+
+    <!-- 逻辑删除申请 -->
+    <update id="deleteById">
+        UPDATE applications
+        SET is_delete = 1, updated_at = NOW()
+        WHERE id = #{id} AND is_delete = 0
+    </update>
+
+    <!-- 统计今日申请数 -->
+    <select id="countToday" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM applications a
+        <if test="hrId != null">
+            INNER JOIN jobs j ON a.job_id = j.id AND j.is_delete = 0
+        </if>
+        WHERE a.is_delete = 0 AND DATE(a.applied_at) = CURDATE()
+        <if test="hrId != null">
+            AND j.hr_id = #{hrId}
+        </if>
+    </select>
+
+    <!-- 统计指定状态的申请数 -->
+    <select id="countByStatus" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM applications a
+        <if test="hrId != null">
+            INNER JOIN jobs j ON a.job_id = j.id AND j.is_delete = 0
+        </if>
+        WHERE a.is_delete = 0 AND a.status = #{status}
+        <if test="hrId != null">
+            AND j.hr_id = #{hrId}
+        </if>
+    </select>
+
+    <!-- 按日期统计近N天申请趋势 -->
+    <select id="countByDateRange" resultType="java.util.HashMap">
+        SELECT DATE(a.applied_at) AS date, COUNT(*) AS count
+        FROM applications a
+        <if test="hrId != null">
+            INNER JOIN jobs j ON a.job_id = j.id AND j.is_delete = 0
+        </if>
+        WHERE a.is_delete = 0 AND a.applied_at >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+        <if test="hrId != null">
+            AND j.hr_id = #{hrId}
+        </if>
+        GROUP BY DATE(a.applied_at)
+        ORDER BY DATE(a.applied_at) ASC
+    </select>
+
+</mapper>

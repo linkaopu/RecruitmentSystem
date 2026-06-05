@@ -1,4 +1,4 @@
-package com.lin.common.utils;
+package com.lin.common.util;
 
 import lombok.extern.slf4j.Slf4j;
 

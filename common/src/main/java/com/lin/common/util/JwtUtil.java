@@ -1,4 +1,4 @@
-package com.lin.common.utils;
+package com.lin.common.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

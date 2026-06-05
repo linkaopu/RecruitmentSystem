@@ -46,9 +46,9 @@ public class WorkExperience {
     private LocalDate endDate;
     
     /**
-     * 是否当前工作
+     * 是否当前工作：0-否，1-是
      */
-    private Boolean isCurrent;
+    private Integer isCurrent;
     
     /**
      * 工作描述

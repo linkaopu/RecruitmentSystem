@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lin.server.mapper.ResumeMapper">
+
+    <!-- 简历结果映射 -->
+    <resultMap id="ResumeResultMap" type="com.lin.pojo.entity.Resume">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="name" column="name"/>
+        <result property="phone" column="phone"/>
+        <result property="email" column="email"/>
+        <result property="age" column="age"/>
+        <result property="gender" column="gender"/>
+        <result property="education" column="education"/>
+        <result property="avatar" column="avatar"/>
+        <result property="skills" column="skills" typeHandler="com.lin.server.util.ListTypeHandler"/>
+        <result property="attachmentUrl" column="attachment_url"/>
+        <result property="attachmentName" column="attachment_name"/>
+        <result property="selfIntroduction" column="self_introduction"/>
+        <result property="isDelete" column="is_delete"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- 根据用户ID查询简历 -->
+    <select id="selectByUserId" resultMap="ResumeResultMap">
+        SELECT *
+        FROM resumes
+        WHERE user_id = #{userId} AND is_delete = 0
+    </select>
+
+    <!-- 分页查询简历列表（管理员） -->
+    <select id="selectAll" resultMap="ResumeResultMap">
+        SELECT *
+        FROM resumes
+        WHERE is_delete = 0
+        ORDER BY created_at DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 查询简历总数 -->
+    <select id="countAll" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM resumes
+        WHERE is_delete = 0
+    </select>
+
+    <!-- 根据ID查询简历详情 -->
+    <select id="selectById" resultMap="ResumeResultMap">
+        SELECT *
+        FROM resumes
+        WHERE id = #{id} AND is_delete = 0
+    </select>
+
+    <!-- 插入简历 -->
+    <insert id="insert" parameterType="com.lin.pojo.entity.Resume" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO resumes (
+            user_id, name, phone, email, age, gender, education,
+            avatar, skills, attachment_url, attachment_name, self_introduction,
+            is_delete, created_at, updated_at
+        ) VALUES (
+            #{userId}, #{name}, #{phone}, #{email}, #{age}, #{gender}, #{education},
+            #{avatar}, #{skills,typeHandler=com.lin.server.util.ListTypeHandler}, #{attachmentUrl}, #{attachmentName}, #{selfIntroduction},
+            0, #{createdAt}, #{updatedAt}
+        )
+    </insert>
+
+    <!-- 更新简历 -->
+    <update id="updateById" parameterType="com.lin.pojo.entity.Resume">
+        UPDATE resumes
+        SET 
+            name = #{name},
+            phone = #{phone},
+            email = #{email},
+            age = #{age},
+            gender = #{gender},
+            education = #{education},
+            avatar = #{avatar},
+            skills = #{skills,typeHandler=com.lin.server.util.ListTypeHandler},
+            attachment_url = #{attachmentUrl},
+            attachment_name = #{attachmentName},
+            self_introduction = #{selfIntroduction},
+            updated_at = #{updatedAt}
+        WHERE id = #{id} AND is_delete = 0
+    </update>
+
+    <!-- 逻辑删除简历 -->
+    <update id="deleteById">
+        UPDATE resumes
+        SET is_delete = 1, updated_at = NOW()
+        WHERE id = #{id} AND is_delete = 0
+    </update>
+
+</mapper>

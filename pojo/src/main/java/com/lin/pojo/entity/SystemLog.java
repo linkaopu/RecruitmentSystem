@@ -29,12 +29,22 @@ public class SystemLog {
      * 用户名
      */
     private String username;
-    
+
     /**
-     * 操作行为
+     * 操作类型（如 LOGIN, APPLY, UPDATE_JOB）
+     */
+    private String actionType;
+
+    /**
+     * 操作行为描述
      */
     private String action;
-    
+
+    /**
+     * 操作对象ID
+     */
+    private Integer targetId;
+
     /**
      * IP地址
      */

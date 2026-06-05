@@ -7,7 +7,9 @@
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
         <result property="username" column="username"/>
+        <result property="actionType" column="action_type"/>
         <result property="action" column="action"/>
+        <result property="targetId" column="target_id"/>
         <result property="ip" column="ip"/>
         <result property="userAgent" column="user_agent"/>
         <result property="isDelete" column="is_delete"/>
@@ -30,8 +32,8 @@
 
     <!-- 插入日志 -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO system_logs (user_id, username, action, ip, user_agent, created_at)
-        VALUES (#{userId}, #{username}, #{action}, #{ip}, #{userAgent}, NOW())
+        INSERT INTO system_logs (user_id, username, action_type, action, target_id, ip, user_agent, created_at)
+        VALUES (#{userId}, #{username}, #{actionType}, #{action}, #{targetId}, #{ip}, #{userAgent}, NOW())
     </insert>
 
 </mapper>

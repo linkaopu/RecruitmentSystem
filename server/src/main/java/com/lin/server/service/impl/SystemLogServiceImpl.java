@@ -17,17 +17,17 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class SystemLogServiceImpl implements SystemLogService {
-    
+
     private final SystemLogMapper systemLogMapper;
-    
+
     @Override
-    public PageResult<SystemLog> getSystemLogs(Integer pageNum, Integer pageSize) {
+    public PageResult<SystemLog> getSystemLogs(Integer page, Integer pageSize) {
         // 查询日志列表
-        List<SystemLog> logs = systemLogMapper.selectLogs(pageNum, pageSize);
-        
+        List<SystemLog> logs = systemLogMapper.selectLogs(page, pageSize);
+
         // 统计总数
         Long total = systemLogMapper.countLogs();
-        
-        return PageResult.of(pageNum, pageSize, total, logs);
+
+        return PageResult.of(page, pageSize, total, logs);
     }
 }
